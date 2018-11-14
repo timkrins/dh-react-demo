@@ -15,9 +15,7 @@ class App extends React.Component {
     // 'selection' is an immutable list
     // Immutable in this instance means you can't change it in place, only replace it with another thing.
 
-    // Below is an example 'topics' structure.
-    // It might not even still be the most efficient way to structure this data...
-    // I will think about it more.
+    // This is an example flat 'topics' structure.
 
     this.state = {
       selection: List([ null ]),
@@ -27,80 +25,82 @@ class App extends React.Component {
           title: 'Test A',
           content: 'This is content',
           color: '#BEE3DB',
-          topics: [
-            {
-              id: 102,
-              title: 'Test A1',
-              content: 'This is content',
-              color: '#FFD6BA'
-            },
-            {
-              id: 103,
-              title: 'Test A2',
-              content: 'This is content',
-              color: '#89B0AE',
-              topics: [
-                {
-                  id: 104,
-                  title: 'Test A2A',
-                  content: 'This is content',
-                  color: '#D4CDF4'
-                },
-                {
-                  id: 105,
-                  title: 'Test A2B',
-                  content: 'This is content',
-                  color: '#97DFFC'
-                }
-              ]
-            }
-          ]
+        },
+        {
+          parent: 101,
+          id: 102,
+          title: 'Test A1',
+          content: 'This is content',
+          color: '#FFD6BA'
+        },
+        {
+          parent: 101,
+          id: 103,
+          title: 'Test A2',
+          content: 'This is content',
+          color: '#89B0AE'
+        },
+        {
+          parent: 103,
+          id: 104,
+          title: 'Test A2A',
+          content: 'This is content',
+          color: '#D4CDF4'
+        },
+        {
+          parent: 103,
+          id: 105,
+          title: 'Test A2B',
+          content: 'This is content',
+          color: '#97DFFC'
         },
         {
           id: 106,
           title: 'Test B',
           content: 'This is content',
-          color: '#E5CDC8',
-          topics: [
-            {
-              id: 107,
-              title: 'Test B1',
-              content: 'This is content',
-              color: '#68EDC6',
-              topics: [
-                {
-                  id: 108,
-                  title: 'Test B1A',
-                  content: 'This is content',
-                  color: '#68EDC6'
-                },
-                {
-                  id: 109,
-                  title: 'Test B1B',
-                  content: 'This is content',
-                  color: '#68EDC6'
-                },
-                {
-                  id: 110,
-                  title: 'Test B1C',
-                  content: 'This is content',
-                  color: '#68EDC6'
-                },
-                {
-                  id: 111,
-                  title: 'Test B1D',
-                  content: 'This is content',
-                  color: '#68EDC6'
-                },
-                {
-                  id: 112,
-                  title: 'Test B1E',
-                  content: 'This is content',
-                  color: '#68EDC6'
-                }
-              ]
-            }
-          ]
+          color: '#E5CDC8'
+        },
+        {
+          parent: 106,
+          id: 107,
+          title: 'Test B1',
+          content: 'This is content',
+          color: '#68EDC6'
+        },
+        {
+          parent: 107,
+          id: 108,
+          title: 'Test B1A',
+          content: 'This is content',
+          color: '#68EDC6'
+        },
+        {
+          parent: 107,
+          id: 109,
+          title: 'Test B1B',
+          content: 'This is content',
+          color: '#68EDC6'
+        },
+        {
+          parent: 107,
+          id: 110,
+          title: 'Test B1C',
+          content: 'This is content',
+          color: '#68EDC6'
+        },
+        {
+          parent: 107,
+          id: 111,
+          title: 'Test B1D',
+          content: 'This is content',
+          color: '#68EDC6'
+        },
+        {
+          parent: 107,
+          id: 112,
+          title: 'Test B1E',
+          content: 'This is content',
+          color: '#68EDC6'
         }
       ]
     }
@@ -125,7 +125,7 @@ class App extends React.Component {
 
     const totalColumns = 3
 
-    let parent = { topics }
+    const rootTopics = _.filter(topics, topic => _.isNil(topic.parent))
 
     return (
       <div className="App">
@@ -134,7 +134,7 @@ class App extends React.Component {
             <div className="card-body">
               <div className="row">
                 <Column>
-                  {_.map(topics, ({ id, title, color }) => (
+                  {_.map(rootTopics, ({ id, title, color }) => (
                     <div key={id}>
                       <Button
                         color={color}
@@ -148,11 +148,17 @@ class App extends React.Component {
                 </Column>
                 {_.map(_.range(1, totalColumns), index => {
                   const selectedParentId = selection.get(index - 1)
-                  // I'm not sure this is the best way to do this - I will have a think about it.
-                  parent = _.find(parent.topics, { id: selectedParentId }) || { topics: [] }
+
+                  const parent = _.find(topics, { id: selectedParentId })
+
+                  let childTopics = []
+                  if (parent) {
+                    childTopics = _.filter(topics, topic => topic.parent === parent.id)
+                  }
+
                   return (
                     <Column key={index}>
-                      {_.map(parent.topics, ({ id, title, color }) => (
+                      {_.map(childTopics, ({ id, title, color }) => (
                         <div key={id}>
                           <Button
                             color={color}
