@@ -1,7 +1,7 @@
 import React from 'react'
 
 const Column = ({ children }) => (
-  <div class="col-sm">
+  <div className="col-sm">
     {children}
   </div>
 )
